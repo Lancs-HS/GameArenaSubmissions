@@ -1,26 +1,60 @@
-public class Driver {
-    public static void main(String[] args) {
-        testGame("Player 1", 6);
-        testGame("Player 2", 4);
-    }
+import java.util.Random;
+public class Driver
+{
+    public static void main(String[] args)
+    {
+        Random rand = new Random();
+        double randX = rand.nextInt(25, 475);
+        double randY = rand.nextInt(25, 275);
+        GameArena arena = new GameArena(500, 300);
+        UFO ufo = new UFO(200, 200);
+        Text txt = new Text("Score: 0", 20, 400, 25, "WHITE");
+        Cow cow = new Cow(randX, randY);
+        arena.addText(txt);
 
-    private static void testGame(String playerName, int numSides) {
-        Dice sixSidedDice = new Dice(numSides);
+        ufo.addTo(arena);
+        cow.addCow(arena);
 
-        Player player = new Player(playerName);
+        int count = 0;
+        int score = 0;
 
-        int guess = player.makeGuess();
-        int rollResult = sixSidedDice.roll();
+        while(true)
+        {
+            //Movement
+            if(arena.letterPressed('w')){
+                ufo.move(0, -10);
+            }else if(arena.letterPressed('a')){
+                ufo.move(-10, 0);
+            } else if(arena.letterPressed('s')){
+                ufo.move(0, 10);
+            } else if(arena.letterPressed('d')){
+                ufo.move(10, 0);
+            }
 
-        displayResult(playerName, guess, rollResult);
-    }
+            //Flashing
+            if(count < 20){
+                count++;
+            } else {
+                ufo.flash();
+                count = 0;
+            }
 
-    private static void displayResult(String playerName, int guess, int rollResult) {
-        if (guess == rollResult) {
-            System.out.printf("Congratulations, %s! %d is correct. You win!\n", playerName, guess);
-        } else {
-            System.out.printf("Sorry, %s. %d is incorrect. The correct answer is %d. Try again!\n",
-                    playerName, guess, rollResult);
+            //Cow Detection
+            if(ufo.checkCollisions(cow)){
+                arena.clearGameArena();
+                score++;
+                double randXco = rand.nextInt(25, 475);
+                double randYco = rand.nextInt(25, 275);
+                //cow.moveTo(randXco, randYco);
+                cow = new Cow(randXco, randYco);
+                txt.setText("Score:" + score);
+                arena.addText(txt);
+                ufo.addTo(arena);
+                cow.addCow(arena);
+            }
+
+            //Pause
+            arena.pause();
         }
     }
 }
